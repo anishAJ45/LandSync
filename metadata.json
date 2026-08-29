@@ -1,0 +1,6 @@
+{
+  "name": "LandSync - Integrated Land Governance Platform",
+  "description": "Smart India Hackathon 2026 (SIH26014) - Integrated GIS-based Digital Public Infrastructure for Land Governance (Phase 10: National Scalability & State Configuration Engine)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,476 @@
+{
+  "type": "FeatureCollection",
+  "name": "LandSync_Demo_Parcels_SIH26014",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-124-1",
+        "survey_number": "124/1",
+        "subdivision": "1",
+        "owner": "Ravi Kumar",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 2.50,
+        "gis_area": 2.50,
+        "area_unit": "Acres",
+        "land_use": "Residential",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0310, 11.0250],
+            [77.0330, 11.0250],
+            [77.0330, 11.0270],
+            [77.0310, 11.0270],
+            [77.0310, 11.0250]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-124-2",
+        "survey_number": "124/2",
+        "subdivision": "2",
+        "owner": "S. Murugan",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 2.50,
+        "gis_area": 2.42,
+        "area_unit": "Acres",
+        "land_use": "Residential",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0330, 11.0250],
+            [77.0350, 11.0250],
+            [77.0350, 11.0270],
+            [77.0330, 11.0270],
+            [77.0330, 11.0250]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-124-3",
+        "survey_number": "124/3",
+        "subdivision": "3",
+        "owner": "Senthil Enterprises",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 1.80,
+        "gis_area": 1.95,
+        "area_unit": "Acres",
+        "land_use": "Commercial",
+        "status": "Under Review"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0350, 11.0250],
+            [77.0373, 11.0250],
+            [77.0373, 11.0270],
+            [77.0350, 11.0270],
+            [77.0350, 11.0250]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-125-1",
+        "survey_number": "125/1",
+        "subdivision": "1",
+        "owner": "Apex Logistics Pvt Ltd",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 3.20,
+        "gis_area": 3.10,
+        "area_unit": "Acres",
+        "land_use": "Commercial",
+        "status": "Boundary Discrepancy"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0368, 11.0250],
+            [77.0395, 11.0250],
+            [77.0395, 11.0270],
+            [77.0368, 11.0270],
+            [77.0368, 11.0250]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-125-2",
+        "survey_number": "125/2",
+        "subdivision": "2",
+        "owner": "K. Muthusamy",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 5.40,
+        "gis_area": 5.38,
+        "area_unit": "Acres",
+        "land_use": "Agricultural",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0395, 11.0245],
+            [77.0425, 11.0245],
+            [77.0425, 11.0270],
+            [77.0395, 11.0270],
+            [77.0395, 11.0245]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-126-1",
+        "survey_number": "126/1",
+        "subdivision": "1",
+        "owner": "Meenakshi Ammal",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 4.20,
+        "gis_area": 4.19,
+        "area_unit": "Acres",
+        "land_use": "Agricultural",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0310, 11.0270],
+            [77.0335, 11.0270],
+            [77.0335, 11.0295],
+            [77.0310, 11.0295],
+            [77.0310, 11.0270]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-126-2",
+        "survey_number": "126/2",
+        "subdivision": "2",
+        "owner": "R. Palanisamy",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 3.80,
+        "gis_area": 3.52,
+        "area_unit": "Acres",
+        "land_use": "Agricultural",
+        "status": "Under Review"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0335, 11.0270],
+            [77.0360, 11.0270],
+            [77.0360, 11.0295],
+            [77.0335, 11.0295],
+            [77.0335, 11.0270]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-127-1",
+        "survey_number": "127/1",
+        "subdivision": "1",
+        "owner": "Tamil Nadu Water Resources Dept",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 8.50,
+        "gis_area": 8.50,
+        "area_unit": "Acres",
+        "land_use": "Government",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0360, 11.0270],
+            [77.0400, 11.0270],
+            [77.0400, 11.0295],
+            [77.0360, 11.0295],
+            [77.0360, 11.0270]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-127-2",
+        "survey_number": "127/2",
+        "subdivision": "2",
+        "owner": "Sulur Town Panchayat (Gram Natham)",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 1.50,
+        "gis_area": 1.49,
+        "area_unit": "Acres",
+        "land_use": "Government",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0400, 11.0270],
+            [77.0425, 11.0270],
+            [77.0425, 11.0295],
+            [77.0400, 11.0295],
+            [77.0400, 11.0270]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-128-1",
+        "survey_number": "128/1",
+        "subdivision": "1",
+        "owner": "TechParks India Corp",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 6.20,
+        "gis_area": 6.22,
+        "area_unit": "Acres",
+        "land_use": "Commercial",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0310, 11.0225],
+            [77.0345, 11.0225],
+            [77.0345, 11.0250],
+            [77.0310, 11.0250],
+            [77.0310, 11.0225]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-128-2",
+        "survey_number": "128/2",
+        "subdivision": "2",
+        "owner": "Lakshmi Narayanan",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 1.10,
+        "gis_area": 1.09,
+        "area_unit": "Acres",
+        "land_use": "Residential",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0345, 11.0225],
+            [77.0370, 11.0225],
+            [77.0370, 11.0250],
+            [77.0345, 11.0250],
+            [77.0345, 11.0225]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-129-1",
+        "survey_number": "129/1",
+        "subdivision": "1",
+        "owner": "V. Karthikeyan",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 2.00,
+        "gis_area": 1.98,
+        "area_unit": "Acres",
+        "land_use": "Residential",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0370, 11.0225],
+            [77.0395, 11.0225],
+            [77.0395, 11.0250],
+            [77.0370, 11.0250],
+            [77.0370, 11.0225]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-129-2",
+        "survey_number": "129/2",
+        "subdivision": "2",
+        "owner": "Selvi Anbarasu",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 1.75,
+        "gis_area": 1.62,
+        "area_unit": "Acres",
+        "land_use": "Agricultural",
+        "status": "Boundary Discrepancy"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0395, 11.0225],
+            [77.0425, 11.0225],
+            [77.0425, 11.0245],
+            [77.0395, 11.0245],
+            [77.0395, 11.0225]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-130-1",
+        "survey_number": "130/1",
+        "subdivision": "1",
+        "owner": "A. Joseph",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 0.85,
+        "gis_area": 0.85,
+        "area_unit": "Acres",
+        "land_use": "Residential",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0310, 11.0295],
+            [77.0335, 11.0295],
+            [77.0335, 11.0315],
+            [77.0310, 11.0315],
+            [77.0310, 11.0295]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-130-2",
+        "survey_number": "130/2",
+        "subdivision": "2",
+        "owner": "G. Natarajan",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 3.10,
+        "gis_area": 3.08,
+        "area_unit": "Acres",
+        "land_use": "Agricultural",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0335, 11.0295],
+            [77.0370, 11.0295],
+            [77.0370, 11.0315],
+            [77.0335, 11.0315],
+            [77.0335, 11.0295]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "TN-CBE-001-131-1",
+        "survey_number": "131/1",
+        "subdivision": "1",
+        "owner": "Tamil Nadu Forest Dept (Reserve Fringe)",
+        "village": "Demo Village",
+        "district": "Coimbatore",
+        "state": "Tamil Nadu",
+        "recorded_area": 12.00,
+        "gis_area": 12.00,
+        "area_unit": "Acres",
+        "land_use": "Government",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [77.0370, 11.0295],
+            [77.0425, 11.0295],
+            [77.0425, 11.0315],
+            [77.0370, 11.0315],
+            [77.0370, 11.0295]
+          ]
+        ]
+      }
+    }
+  ]
+}
