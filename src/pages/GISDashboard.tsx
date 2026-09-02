@@ -4,7 +4,9 @@ import {
   POLLACHI_TALUK_GIS,
   DISTRICTS_LIST,
   TALUKS_LIST,
-  LandParcel
+  LandParcel,
+  EXCEL_PARCELS_MAP,
+  convertExcelRecordToLandParcel
 } from '../data/gisData';
 import { spatialAnalysisService, SpatialAnalysisReport } from '../services/spatialAnalysis';
 import { GISMap } from '../components/gis/GISMap';
@@ -17,7 +19,8 @@ import {
   Sparkles,
   BarChart3,
   ShieldCheck,
-  Home
+  Home,
+  FileSpreadsheet
 } from 'lucide-react';
 
 export const GISDashboard: React.FC = () => {
@@ -36,27 +39,38 @@ export const GISDashboard: React.FC = () => {
   const [activeLayers, setActiveLayers] = useState<ActiveGISLayers>(DEFAULT_ACTIVE_LAYERS);
   const [layerOpacity, setLayerOpacity] = useState<number>(0.85);
 
-  // Selected Parcel & Spatial Analysis State
+  // Selected Parcel State
   const [selectedParcelId, setSelectedParcelId] = useState<string>('TN-CBE-001-124-2');
   const [analysisReport, setAnalysisReport] = useState<SpatialAnalysisReport | null>(null);
 
-  // Find active Pollachi property parcel by Registration Number, ULPIN or Survey Number
+  // Find active Pollachi property parcel by Registration Number, ULPIN, Survey Number or Excel Parcel ID
   const activeParcel = useMemo(() => {
+    if (!selectedParcelId) return POLLACHI_TALUK_GIS.parcels[1];
     const clean = selectedParcelId.trim().toUpperCase();
     const cleanNoSpace = clean.replace(/\s+/g, '');
-    return (
-      POLLACHI_TALUK_GIS.parcels.find(
-        (p) =>
-          p.ulpin.toUpperCase() === clean ||
-          p.id.toUpperCase() === clean ||
-          (p.regNumber && p.regNumber.toUpperCase() === clean) ||
-          (p.regNumber && p.regNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
-          (p.fullSurveyNo && p.fullSurveyNo.toUpperCase() === clean) ||
-          (p.fullSurveyNo && p.fullSurveyNo.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
-          p.surveyNumber.toUpperCase() === clean ||
-          p.surveyNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace
-      ) || POLLACHI_TALUK_GIS.parcels[1] // Default to 124/2 House Plot
+
+    // 1. Search in pre-loaded GIS parcels array
+    const matchedInMemory = POLLACHI_TALUK_GIS.parcels.find(
+      (p) =>
+        p.ulpin.toUpperCase() === clean ||
+        p.id.toUpperCase() === clean ||
+        (p.regNumber && p.regNumber.toUpperCase() === clean) ||
+        (p.regNumber && p.regNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
+        (p.fullSurveyNo && p.fullSurveyNo.toUpperCase() === clean) ||
+        (p.fullSurveyNo && p.fullSurveyNo.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
+        p.surveyNumber.toUpperCase() === clean ||
+        p.surveyNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace
     );
+
+    if (matchedInMemory) return matchedInMemory;
+
+    // 2. Search in 18,284 record Excel lookup dictionary
+    const rawExcelRec = EXCEL_PARCELS_MAP[clean] || EXCEL_PARCELS_MAP[`DEMO-PLCH-${clean}`];
+    if (rawExcelRec) {
+      return convertExcelRecordToLandParcel(rawExcelRec, 99);
+    }
+
+    return POLLACHI_TALUK_GIS.parcels[1]; // Default to 124/2 House Plot
   }, [selectedParcelId]);
 
   // Run spatial analysis whenever active parcel changes
@@ -67,7 +81,7 @@ export const GISDashboard: React.FC = () => {
     }
   }, [activeParcel]);
 
-  // Search Submit Handler: Supports Registration Number, ULPIN or Survey Subdivision
+  // Search Submit Handler: Supports Excel Parcel IDs (DEMO-PLCH-000001), Registration Numbers, ULPINs, Survey Subdivision
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const query = searchQuery.trim().toUpperCase();
@@ -90,6 +104,10 @@ export const GISDashboard: React.FC = () => {
     if (matched) {
       setSelectedParcelId(matched.ulpin);
       setSearchParams({ q: matched.ulpin });
+    } else if (EXCEL_PARCELS_MAP[query] || EXCEL_PARCELS_MAP[`DEMO-PLCH-${query}`]) {
+      const key = EXCEL_PARCELS_MAP[query] ? query : `DEMO-PLCH-${query}`;
+      setSelectedParcelId(key);
+      setSearchParams({ q: key });
     } else {
       setSelectedParcelId('TN-CBE-001-124-2');
     }
@@ -130,11 +148,11 @@ export const GISDashboard: React.FC = () => {
             <span>POLLACHI LAND INTELLIGENCE GIS DASHBOARD</span>
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-950 border border-blue-200 flex items-center gap-1">
               <Home className="w-3.5 h-3.5 text-blue-900" />
-              <span>Parcel Intelligence Active</span>
+              <span>18,284 Excel Records Loaded</span>
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-4xl">
-            Land parcel intelligence interface for Pollachi Taluk. Search by Registration Number (e.g. REG-2024-CBE-12402), ULPIN, or Survey Subdivision to zoom directly to your parcel and run 5 spatial intelligence checks.
+            Land parcel intelligence interface for Pollachi Taluk. Loaded with 18,284 records from LANDSYNC_Pollachi_Parcel_Prototype.xlsx. Search by Excel Parcel ID (DEMO-PLCH-000001), Registration Number (REG-2024-CBE-12402), ULPIN, or Survey Subdivision to zoom directly to your parcel.
           </p>
         </div>
 
@@ -150,12 +168,12 @@ export const GISDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* State Adaptor & Registration Number Flow Banner */}
+      {/* Dataset Verification Banner */}
       <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-3.5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm border border-blue-900">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="w-4 h-4 text-teal-300 shrink-0" />
+          <FileSpreadsheet className="w-4 h-4 text-teal-300 shrink-0" />
           <div>
-            <span className="font-bold text-teal-300">State Adaptor Search Flow:</span> Registration Number REG-2024-CBE-12402 &rarr; State Tamil Nilam &rarr; ULPIN TN-CBE-001-124-2 &rarr; Survey 124/2 (0.12 Acre Plot).
+            <span className="font-bold text-teal-300">Both Excel Datasets Loaded:</span> LANDSYNC_Pollachi_Parcel_Prototype.xlsx & (1).xlsx (18,284 Pollachi parcel records across 65 villages). All Mahalingapuram Main Road visualizers remain 100% active.
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2.5 py-1 rounded-lg shrink-0 font-mono text-slate-200">
@@ -169,12 +187,12 @@ export const GISDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================= LEFT PANEL (3 cols) ================= */}
         <div className="lg:col-span-3 space-y-4">
-          {/* Registration Number & ULPIN Search Form */}
+          {/* Registration Number & Excel Parcel ID Search Form */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
                 <Search className="w-4 h-4 text-blue-900" />
-                <span>Search Reg No / ULPIN</span>
+                <span>Search Reg No / Parcel ID</span>
               </h3>
               <button
                 onClick={handleResetFilters}
@@ -189,14 +207,14 @@ export const GISDashboard: React.FC = () => {
             <form onSubmit={handleSearch} className="space-y-2">
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Registration #, ULPIN or Survey No
+                  Reg #, ULPIN, Excel ID or Survey No
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="e.g. REG-2024-CBE-12402 or 124/2"
+                    placeholder="e.g. DEMO-PLCH-000001 or 124/2"
                     className="w-full pl-3 pr-9 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold text-blue-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white"
                   />
                   <button
@@ -262,29 +280,28 @@ export const GISDashboard: React.FC = () => {
               </div>
             </form>
 
-            {/* Quick Registration Number Presets */}
+            {/* Quick Registration & Excel Parcel Presets */}
             <div className="pt-2 border-t border-slate-100">
               <div className="text-[10px] font-bold uppercase text-slate-400 mb-1.5 flex items-center justify-between">
-                <span>Registration Presets</span>
+                <span>Dataset Presets</span>
                 <span className="text-[9px] text-teal-700 font-extrabold">Zoom to Parcel 🟡</span>
               </div>
               <div className="flex flex-wrap gap-1">
-                {POLLACHI_TALUK_GIS.parcels.slice(0, 6).map((p) => (
+                {['REG-2024-CBE-12402', 'DEMO-PLCH-000001', 'DEMO-PLCH-000002', 'DEMO-PLCH-000003', 'TN-CBE-001-124-1'].map((pKey) => (
                   <button
-                    key={p.id}
+                    key={pKey}
                     onClick={() => {
-                      const displayNo = p.regNumber || p.fullSurveyNo || p.surveyNumber;
-                      setSearchQuery(displayNo);
-                      setSelectedParcelId(p.ulpin);
-                      setSearchParams({ q: p.ulpin });
+                      setSearchQuery(pKey);
+                      setSelectedParcelId(pKey);
+                      setSearchParams({ q: pKey });
                     }}
                     className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition border ${
-                      p.ulpin === activeParcel?.ulpin
+                      pKey === activeParcel?.ulpin || pKey === activeParcel?.regNumber
                         ? 'bg-blue-950 text-teal-300 border-blue-950 shadow-xs'
                         : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                     }`}
                   >
-                    {p.regNumber ? p.regNumber.replace('REG-2024-CBE-', 'Reg ') : `Plot ${p.fullSurveyNo}`}
+                    {pKey.replace('DEMO-PLCH-', 'XL-').replace('REG-2024-CBE-', 'Reg ')}
                   </button>
                 ))}
               </div>
@@ -316,14 +333,14 @@ export const GISDashboard: React.FC = () => {
             />
           </div>
 
-          {/* Pollachi Mahalingapuram Property Plot Strip */}
+          {/* Pollachi Property Plot Strip */}
           <div className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm space-y-2">
             <div className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center justify-between">
-              <span>Land Parcels ({POLLACHI_TALUK_GIS.parcels.length} Properties)</span>
+              <span>Land Parcels ({POLLACHI_TALUK_GIS.parcels.length} Pre-loaded / 18,284 Total)</span>
               <span className="text-[10px] text-slate-400 font-normal">Click to zoom & inspect</span>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-              {POLLACHI_TALUK_GIS.parcels.map((p) => {
+              {POLLACHI_TALUK_GIS.parcels.slice(0, 15).map((p) => {
                 const isSelected = activeParcel && p.ulpin === activeParcel.ulpin;
                 const isDiscrepancy = p.ulpin === 'TN-CBE-001-124-3';
 
@@ -345,7 +362,7 @@ export const GISDashboard: React.FC = () => {
                   >
                     <div className="flex items-center justify-between gap-1 mb-0.5">
                       <span className={`font-black ${isSelected ? 'text-teal-300' : 'text-blue-950'}`}>
-                        🟡 Survey {p.fullSurveyNo || p.surveyNumber}
+                        🟡 {p.fullSurveyNo ? `Survey ${p.fullSurveyNo}` : p.id}
                       </span>
                       <span
                         className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${

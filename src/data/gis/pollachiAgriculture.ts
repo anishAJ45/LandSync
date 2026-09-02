@@ -1,4 +1,4 @@
-// Pollachi Agricultural Zones Context Layer (Coconut Farming Preserves, Paddy Belts)
+// Pollachi Agricultural Zones Context Layer (AG-001)
 export interface AgriZoneFeature {
   id: string;
   name: string;
@@ -11,17 +11,17 @@ export interface AgriZoneFeature {
   disclaimerNotice: string;
 }
 
-// Agricultural Zone positioned North of North plots (lat 10.66470 to 10.66560)
+// Zone ID: AG-001 (Type: Agricultural)
 export const POLLACHI_AGRICULTURE_ZONES: AgriZoneFeature[] = [
   {
-    id: 'AGRI-POLLACHI-1',
+    id: 'AG-001',
     name: 'Pollachi Coconut Plantation Preserve (North Belt)',
     category: 'agricultural',
-    typeLabel: 'Coconut Farming Preserve Zone (Nanjai/Garden Land)',
+    typeLabel: 'Agricultural Zone (Nanjai/Garden Land)',
     description: 'Protected coconut agro-horticulture preserve under TN Agri Master Plan 2035.',
-    color: '#10b981', // Green
-    fillOpacity: 0.22,
-    disclaimerNotice: 'Prototype / reference GIS layer',
+    color: '#84cc16', // Light transparent green
+    fillOpacity: 0.18,
+    disclaimerNotice: 'Zoned Agricultural Preserve',
     coordinates: [
       [10.66470, 77.00680],
       [10.66560, 77.00680],

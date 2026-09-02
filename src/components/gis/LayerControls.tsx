@@ -3,20 +3,26 @@ import { Layers, Check, Info } from 'lucide-react';
 
 export interface ActiveGISLayers {
   landParcels: boolean;
-  approvedLayout: boolean;
   agriculturalLand: boolean;
+  approvedLayout: boolean;
   governmentLand: boolean;
-  waterBodies: boolean;
-  environmentalZones: boolean; // Prone / Restricted Zones
-  roadsInfrastructure: boolean;
+  rivers: boolean;
+  streams: boolean;
+  ponds: boolean;
+  lakes: boolean;
+  environmentalZones: boolean; // Environmental / Prone Zones
+  roadsInfrastructure: boolean; // Roads and Infrastructure
 }
 
 export const DEFAULT_ACTIVE_LAYERS: ActiveGISLayers = {
   landParcels: true,
-  approvedLayout: true,
   agriculturalLand: true,
+  approvedLayout: true,
   governmentLand: true,
-  waterBodies: true,
+  rivers: true,
+  streams: true,
+  ponds: true,
+  lakes: true,
   environmentalZones: true,
   roadsInfrastructure: true
 };
@@ -38,65 +44,67 @@ export const LayerControls: React.FC<LayerControlsProps> = ({
     key: keyof ActiveGISLayers;
     label: string;
     icon: string;
-    badgeColor: string;
     description: string;
-    disclaimerNotice: string;
   }[] = [
     {
       key: 'landParcels',
-      label: 'Selected Parcel & Boundaries',
+      label: '1. Parcel Boundaries',
       icon: '🟡',
-      badgeColor: 'bg-yellow-100 text-yellow-900 border-yellow-300',
-      description: 'Primary Cadastral Survey Land Parcel Boundaries & Selected Highlight.',
-      disclaimerNotice: 'Official land records required for legal verification'
-    },
-    {
-      key: 'approvedLayout',
-      label: 'Approved Construction Zone',
-      icon: '🟢',
-      badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-      description: 'DTCP / LPA Approved Residential & Commercial Layout Zones.',
-      disclaimerNotice: 'Sanctioned DTCP Master Plan Layer'
+      description: 'Cadastral Survey Land Parcel Boundaries & Selected Highlight.'
     },
     {
       key: 'agriculturalLand',
-      label: 'Agricultural Land',
+      label: '2. Agricultural Land',
       icon: '🌾',
-      badgeColor: 'bg-lime-100 text-lime-900 border-lime-300',
-      description: 'Zoned Agricultural Preserves & Coconut Cultivation Belts.',
-      disclaimerNotice: 'Zoned Agricultural Preserve'
+      description: 'Zoned Agricultural Preserves & Coconut Cultivation Belts.'
+    },
+    {
+      key: 'approvedLayout',
+      label: '3. Approved Layout / Development Area',
+      icon: '🟢',
+      description: 'DTCP / LPA Approved Residential & Commercial Layout Zones.'
     },
     {
       key: 'governmentLand',
-      label: 'Government / Poramboke Land',
+      label: '4. Government / Poramboke Land',
       icon: '🏛️',
-      badgeColor: 'bg-orange-100 text-orange-950 border-orange-300',
-      description: 'Revenue Poramboke Land & Government Statutory Reserve Buffers.',
-      disclaimerNotice: 'State Revenue Department Statutory Reserve'
+      description: 'Revenue Poramboke Land & Government Statutory Reserve Buffers.'
     },
     {
-      key: 'waterBodies',
-      label: 'Water Bodies & Streams',
+      key: 'rivers',
+      label: '5. Rivers',
+      icon: '🏞️',
+      description: 'Major River Corridors & Main Statutory Protection Belts.'
+    },
+    {
+      key: 'streams',
+      label: '6. Streams',
       icon: '🌊',
-      badgeColor: 'bg-sky-100 text-sky-950 border-sky-300',
-      description: 'Aliyar Irrigation Stream Corridor & Mahalingapuram Storage Pond.',
-      disclaimerNotice: '50m PWD Statutory Water Protection Buffer'
+      description: 'Aliyar Irrigation Canal & Tributary Stream Network.'
+    },
+    {
+      key: 'ponds',
+      label: '7. Ponds',
+      icon: '💧',
+      description: 'Mahalingapuram Local Storage Ponds & Catchments.'
+    },
+    {
+      key: 'lakes',
+      label: '8. Lakes',
+      icon: '⛵',
+      description: 'Regional Water Storage Lakes & Reservoirs.'
     },
     {
       key: 'environmentalZones',
-      label: 'Prone / Restricted Zones',
+      label: '9. Environmental / Prone Zones',
       icon: '⚠️',
-      badgeColor: 'bg-purple-100 text-purple-950 border-purple-300',
-      description: 'Eco-Sensitive Buffers & Flood / Environmental Restricted Zones.',
-      disclaimerNotice: 'Protected Eco-Sensitive Zone'
+      description: 'Eco-Sensitive Buffers & Hazard / Restricted Zones.'
     },
     {
       key: 'roadsInfrastructure',
-      label: 'Roads & Infrastructure',
+      label: '10. Roads and Infrastructure',
       icon: '🛣️',
-      badgeColor: 'bg-slate-200 text-slate-900 border-slate-300',
-      description: 'Mahalingapuram Main Road & Access Street Corridors.',
-      disclaimerNotice: 'Access Street Corridor Layer'
+      description: 'Mahalingapuram Main Road & Access Street Corridors.'
     }
   ];
 
@@ -110,51 +118,46 @@ export const LayerControls: React.FC<LayerControlsProps> = ({
           </div>
           <div>
             <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-              Land Parcel GIS Layers
+              GIS Intelligence Layers
             </h3>
-            <p className="text-[10px] text-slate-500 font-semibold">8 Focused GIS Intelligence Layers</p>
+            <p className="text-[10px] text-slate-500 font-semibold">10 Independent Toggleable Layers</p>
           </div>
         </div>
       </div>
 
-      {/* Layer Toggle Switches */}
-      <div className="space-y-2">
+      {/* 10 Independent Layer Toggle Switches */}
+      <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
         {layerConfigs.map((cfg) => {
           const isActive = layers[cfg.key];
           return (
             <div
               key={cfg.key}
               onClick={() => onToggleLayer(cfg.key)}
-              className={`p-2.5 rounded-xl border cursor-pointer transition select-none ${
+              className={`p-2 rounded-xl border cursor-pointer transition select-none ${
                 isActive
                   ? 'bg-slate-50 border-slate-300 shadow-2xs'
-                  : 'bg-white border-slate-100 opacity-60 hover:opacity-100'
+                  : 'bg-white border-slate-100 opacity-50 hover:opacity-90'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">{cfg.icon}</span>
+                  <span className="text-xs">{cfg.icon}</span>
                   <span className="text-xs font-extrabold text-slate-900">{cfg.label}</span>
                 </div>
                 <div
-                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${
+                  className={`w-4 h-4 rounded border flex items-center justify-center transition ${
                     isActive
                       ? 'bg-blue-950 border-blue-950 text-teal-300'
                       : 'bg-white border-slate-300'
                   }`}
                 >
-                  {isActive && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {isActive && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
               </div>
 
-              <p className="text-[10px] text-slate-500 mt-1 leading-snug font-medium pl-6">
+              <p className="text-[9px] text-slate-500 mt-0.5 leading-snug font-medium pl-6">
                 {cfg.description}
               </p>
-
-              <div className="mt-1.5 pl-6 flex items-center gap-1 text-[9px] text-slate-400 font-semibold italic">
-                <Info className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                <span>{cfg.disclaimerNotice}</span>
-              </div>
             </div>
           );
         })}
@@ -182,8 +185,8 @@ export const LayerControls: React.FC<LayerControlsProps> = ({
       </div>
 
       {/* Footer Disclaimer */}
-      <div className="p-2.5 bg-slate-100 rounded-xl border border-slate-200 text-[9px] text-slate-500 font-semibold leading-relaxed text-center">
-        Based on available GIS and reference datasets. Official verification may be required.
+      <div className="p-2 bg-slate-100 rounded-xl border border-slate-200 text-[9px] text-slate-500 font-semibold leading-relaxed text-center">
+        GIS analysis is based on available reference and spatial datasets. Official verification may be required.
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Home,
+  Globe,
+  Database,
   X
 } from 'lucide-react';
 
@@ -40,7 +42,7 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
         </div>
         <h4 className="font-bold text-slate-800 text-sm">Land Intelligence Report</h4>
         <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-          Enter a Registration Number (e.g. REG-2024-CBE-12402), ULPIN, or Survey Number to view parcel-level GIS spatial checks.
+          Enter a Registration Number, ULPIN, or Survey Number to view property details and 10-layer spatial intelligence checks.
         </p>
       </div>
     );
@@ -54,6 +56,8 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
 
   const surveyDisplay = parcel.fullSurveyNo || (parcel.subdivision ? `${parcel.surveyNumber}/${parcel.subdivision}` : parcel.surveyNumber);
   const regNoDisplay = parcel.regNumber || analysis.regNumber || 'REG-2024-CBE-12402';
+  const classificationDisplay = parcel.landClassification || analysis.landClassification || 'Data unavailable for this parcel';
+  const webMeta = analysis.webSourceMetadata;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[85vh] lg:max-h-none">
@@ -81,7 +85,7 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
 
       {/* Report Body Content */}
       <div className="p-4 overflow-y-auto space-y-4 scrollbar-thin">
-        {/* Risk / Overall Status Banner */}
+        {/* Overall Status Banner */}
         <div
           className={`p-3.5 rounded-xl border flex items-start gap-3 ${
             analysis.overallRiskLevel === 'HIGH'
@@ -103,21 +107,19 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
             <div className="font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5">
               <span>
                 {analysis.overallRiskLevel === 'HIGH'
-                  ? '⚠️ OVERLAP WARNING FLAGGED'
-                  : analysis.overallRiskLevel === 'MEDIUM'
-                  ? '⚠️ REQUIRES VERIFICATION'
-                  : '✅ CLEAR LAND PARCEL PROFILE'}
+                  ? '⚠️ SPATIAL DISCREPANCY FLAGGED'
+                  : '✅ REFERENCE PROPERTY PROFILE'}
               </span>
             </div>
             <p className="text-xs mt-1 leading-relaxed">{analysis.prototypeSpatialAnalysis}</p>
           </div>
         </div>
 
-        {/* Section 1: Land Parcel Metadata */}
+        {/* Section 1: PROPERTY IDENTIFICATION */}
         <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/80 space-y-2.5">
           <h3 className="text-xs font-black uppercase text-blue-950 tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-1.5">
             <Home className="w-4 h-4 text-blue-900" />
-            <span>📍 Land Parcel Metadata</span>
+            <span>PROPERTY IDENTIFICATION</span>
           </h3>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -141,13 +143,18 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
             </div>
 
             <div className="bg-white p-2 rounded-lg border border-slate-200">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Survey Number</div>
-              <div className="font-extrabold text-blue-950">{surveyDisplay}</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase">Survey & Subdivision</div>
+              <div className="font-extrabold text-blue-950">{surveyDisplay} (Subdiv: {parcel.subdivision || 'A'})</div>
             </div>
 
             <div className="bg-white p-2 rounded-lg border border-slate-200">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Land Area</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase">Plot Area</div>
               <div className="font-bold text-slate-900 font-mono text-xs">{parcel.area}</div>
+            </div>
+
+            <div className="bg-white p-2 rounded-lg border border-slate-200">
+              <div className="text-[10px] text-slate-400 font-bold uppercase">Land Classification</div>
+              <div className="font-extrabold text-slate-900 text-xs">{classificationDisplay}</div>
             </div>
 
             <div className="bg-white p-2 rounded-lg border border-slate-200">
@@ -156,166 +163,171 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
             </div>
 
             <div className="bg-white p-2 rounded-lg border border-slate-200">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Taluk</div>
-              <div className="font-bold text-blue-950">{parcel.taluk || 'Pollachi'}</div>
-            </div>
-
-            <div className="bg-white p-2 rounded-lg border border-slate-200">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">District</div>
-              <div className="font-bold text-slate-900">{parcel.district || 'Coimbatore'}</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase">Taluk & District</div>
+              <div className="font-bold text-blue-950">{parcel.taluk || 'Pollachi'}, {parcel.district || 'Coimbatore'}</div>
             </div>
           </div>
         </div>
 
-        {/* Section 2: 5-Point GIS Spatial Checks */}
+        {/* Section 2: SPATIAL ANALYSIS (10 GIS Layers) */}
         <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/80 space-y-2.5">
           <h3 className="text-xs font-black uppercase text-blue-950 tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-1.5">
             <Compass className="w-4 h-4 text-blue-900" />
-            <span>🌍 GIS SPATIAL CHECKS</span>
+            <span>SPATIAL ANALYSIS (10 GIS LAYERS)</span>
           </h3>
 
           <div className="space-y-2 text-xs">
-            {/* 1. Approved Area Check */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 1. Parcel Boundary */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">🟢</span>
-                <span className="font-semibold text-slate-700">Approved Area:</span>
+                <span>🟡</span>
+                <span className="font-semibold text-slate-700">Parcel Boundary:</span>
               </div>
-              <div>
-                {analysis.approvedAreaStatus === 'INSIDE' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Inside DTCP Layout</span>
-                  </span>
-                ) : analysis.approvedAreaStatus === 'INTERSECTS' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center gap-1">
-                    <Info className="w-3 h-3" />
-                    <span>Intersects LPA Zone</span>
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600">
-                    Verification Required
-                  </span>
-                )}
-              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                {analysis.parcelBoundaryStatus}
+              </span>
             </div>
 
-            {/* 2. Agricultural Land Check */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 2. Agricultural Land */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">🌾</span>
+                <span>🌾</span>
                 <span className="font-semibold text-slate-700">Agricultural Land:</span>
               </div>
-              <div>
-                {analysis.agriculturalStatus === 'OVERLAP' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-lime-50 text-lime-800 border border-lime-200 flex items-center gap-1">
-                    <Info className="w-3 h-3" />
-                    <span>Agri Overlap</span>
-                  </span>
-                ) : analysis.agriculturalStatus === 'NEARBY' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                    Nearby Agri Belt
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>No Overlap</span>
-                  </span>
-                )}
-              </div>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                  analysis.agriculturalStatus === 'Overlap Detected'
+                    ? 'bg-lime-50 text-lime-900 border-lime-300'
+                    : analysis.agriculturalStatus.includes('Nearby')
+                    ? 'bg-amber-50 text-amber-900 border-amber-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                }`}
+              >
+                {analysis.agriculturalStatus}
+              </span>
             </div>
 
-            {/* 3. Government / Poramboke Check */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 3. Approved Layout */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">🏛️</span>
+                <span>🟢</span>
+                <span className="font-semibold text-slate-700">Approved Layout:</span>
+              </div>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                  analysis.approvedAreaStatus.includes('Inside')
+                    ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                }`}
+              >
+                {analysis.approvedAreaStatus}
+              </span>
+            </div>
+
+            {/* 4. Government Land */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+              <div className="flex items-center gap-2">
+                <span>🏛️</span>
                 <span className="font-semibold text-slate-700">Government Land:</span>
               </div>
-              <div>
-                {analysis.governmentLandStatus === 'OVERLAP_WARNING' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1">
-                    <XCircle className="w-3 h-3 text-rose-600" />
-                    <span>⚠️ OVERLAP WARNING</span>
-                  </span>
-                ) : analysis.governmentLandStatus === 'NEARBY' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                    Nearby Poramboke
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>No Overlap</span>
-                  </span>
-                )}
-              </div>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                  analysis.governmentLandStatus.includes('WARNING')
+                    ? 'bg-rose-50 text-rose-900 border-rose-300 font-extrabold'
+                    : analysis.governmentLandStatus.includes('Nearby')
+                    ? 'bg-amber-50 text-amber-900 border-amber-200'
+                    : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                }`}
+              >
+                {analysis.governmentLandStatus}
+              </span>
             </div>
 
-            {/* 4. Waterbody Distance */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 5-8. Water Body (Rivers, Streams, Ponds, Lakes) */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">🌊</span>
-                <span className="font-semibold text-slate-700">Waterbody Distance:</span>
+                <span>🌊</span>
+                <span className="font-semibold text-slate-700">Water Body:</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold font-mono text-blue-950 text-xs">{analysis.waterBodyDistance}</span>
-              </div>
+              <span className="font-bold font-mono text-blue-950 text-[10px]">
+                {analysis.waterBodyStatus}
+              </span>
             </div>
 
-            {/* 5. Prone / Restricted Zone Check */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 9. Prone Zone */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">⚠️</span>
-                <span className="font-semibold text-slate-700">Prone / Restricted Zone:</span>
+                <span>⚠️</span>
+                <span className="font-semibold text-slate-700">Prone / Hazard Zone:</span>
               </div>
-              <div>
-                {analysis.proneZoneStatus === 'INSIDE' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 text-rose-600" />
-                    <span>Inside Eco Prone Zone</span>
-                  </span>
-                ) : analysis.proneZoneStatus === 'NEARBY' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                    Nearby Buffer
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Outside Data</span>
-                  </span>
-                )}
-              </div>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                  analysis.proneZoneStatus === 'Inside Zone'
+                    ? 'bg-rose-50 text-rose-900 border-rose-300'
+                    : analysis.proneZoneStatus === 'Nearby'
+                    ? 'bg-amber-50 text-amber-900 border-amber-200'
+                    : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                }`}
+              >
+                {analysis.proneZoneStatus}
+              </span>
             </div>
 
-            {/* Boundary Reference Status */}
-            <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+            {/* 10. Road Access */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
               <div className="flex items-center gap-2">
-                <span className="text-sm">📐</span>
-                <span className="font-semibold text-slate-700">Boundary Status:</span>
+                <span>🛣️</span>
+                <span className="font-semibold text-slate-700">Road Access:</span>
               </div>
-              <div>
-                {analysis.boundaryStatus === 'DISCREPANCY_FLAGGED' ? (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1">
-                    <XCircle className="w-3 h-3" />
-                    <span>Discrepancy Flagged</span>
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Reference Boundary Shown</span>
-                  </span>
-                )}
-              </div>
+              <span className="font-bold text-slate-900 text-[10px]">
+                {analysis.roadAccessStatus}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Section 3: Patta & Government Record */}
-        <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-slate-900 space-y-1 text-xs">
-          <div className="font-black text-[11px] uppercase tracking-wider text-slate-700 flex items-center gap-1">
-            <FileText className="w-3.5 h-3.5 text-blue-900 shrink-0" />
-            <span>GOVERNMENT RECORD</span>
+        {/* Section 3: WEB DATA COLLECTION METADATA */}
+        <div className="bg-slate-900 text-white rounded-xl p-3.5 border border-slate-800 space-y-2 text-xs">
+          <div className="text-[10px] font-black uppercase text-teal-400 tracking-wider flex items-center justify-between border-b border-white/10 pb-1">
+            <span className="flex items-center gap-1">
+              <Globe className="w-3.5 h-3.5" />
+              <span>SUPPLEMENTARY WEB COLLECTION METADATA</span>
+            </span>
+            <Database className="w-3.5 h-3.5 text-teal-400" />
           </div>
-          <p className="text-[11px] font-medium leading-relaxed">{analysis.governmentRecord}</p>
+
+          <div className="grid grid-cols-2 gap-1.5 text-[10px] pt-1">
+            <div className="col-span-2 flex justify-between">
+              <span className="text-slate-400">Source Name:</span>
+              <span className="font-bold text-slate-200">{webMeta.sourceName}</span>
+            </div>
+
+            <div className="col-span-2 flex justify-between">
+              <span className="text-slate-400">Source URL:</span>
+              <a
+                href={webMeta.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-teal-300 underline hover:text-teal-200"
+              >
+                {webMeta.sourceUrl}
+              </a>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-slate-400">Date Collected:</span>
+              <span className="font-mono text-slate-200">{webMeta.dateCollected}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-slate-400">Last Updated:</span>
+              <span className="font-mono text-slate-200">{webMeta.lastUpdated}</span>
+            </div>
+
+            <div className="col-span-2 text-[9px] text-amber-300 italic pt-1 border-t border-white/10">
+              Note: Supplementary web collected data is reference information and does not supersede government cadastral truth.
+            </div>
+          </div>
         </div>
 
         {/* Parcel 360 Link */}
@@ -329,9 +341,9 @@ export const LandIntelligencePanel: React.FC<LandIntelligencePanelProps> = ({
           </button>
         )}
 
-        {/* Permanent Disclaimer */}
+        {/* MANDATORY LEGAL DISCLAIMER */}
         <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-[10px] text-slate-600 font-bold leading-relaxed text-center">
-          Based on available GIS and reference datasets. Official verification may be required.
+          GIS analysis is based on available reference and spatial datasets. Official verification may be required. Generated or estimated geometry must not be treated as an official cadastral boundary.
         </div>
       </div>
     </div>

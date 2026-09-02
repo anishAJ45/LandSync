@@ -1,4 +1,4 @@
-// Pollachi Government Land & Poramboke Buffer Dataset
+// Pollachi Government Land & Poramboke Buffer Dataset (GOV-002)
 export interface GovtZoneFeature {
   id: string;
   name: string;
@@ -11,15 +11,15 @@ export interface GovtZoneFeature {
   disclaimerNotice: string;
 }
 
-// Government Revenue Poramboke Zone (West of South plots at lat 10.66360 to 10.66405, lng 77.00620 to 77.00680)
+// Zone ID: GOV-002 (Type: Government Land)
 export const POLLACHI_GOVERNMENT_ZONES: GovtZoneFeature[] = [
   {
-    id: 'GOVT-POLLACHI-1',
+    id: 'GOV-002',
     name: 'Mahalingapuram Revenue Anadheenam Poramboke',
     category: 'government',
-    typeLabel: 'Government Poramboke Reserve Land (Non-Assessed)',
+    typeLabel: 'Government Land Reserve (Poramboke)',
     description: 'Revenue Department Government Poramboke Land Buffer.',
-    color: '#ea580c', // Orange / Amber
+    color: '#f97316', // Orange
     fillOpacity: 0.22,
     disclaimerNotice: 'State Revenue Department Statutory Reserve',
     coordinates: [
