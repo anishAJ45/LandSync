@@ -26,7 +26,7 @@ export const GISDashboard: React.FC = () => {
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState<string>(
-    searchParams.get('q') || searchParams.get('ulpin') || 'TN-CBE-001-124-2'
+    searchParams.get('q') || searchParams.get('ulpin') || 'REG-2024-CBE-12402'
   );
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Coimbatore');
   const [selectedTaluk, setSelectedTaluk] = useState<string>('Pollachi');
@@ -40,7 +40,7 @@ export const GISDashboard: React.FC = () => {
   const [selectedParcelId, setSelectedParcelId] = useState<string>('TN-CBE-001-124-2');
   const [analysisReport, setAnalysisReport] = useState<SpatialAnalysisReport | null>(null);
 
-  // Find active Pollachi property parcel by ULPIN or Survey Number & Subdivision
+  // Find active Pollachi property parcel by Registration Number, ULPIN or Survey Number
   const activeParcel = useMemo(() => {
     const clean = selectedParcelId.trim().toUpperCase();
     const cleanNoSpace = clean.replace(/\s+/g, '');
@@ -49,6 +49,8 @@ export const GISDashboard: React.FC = () => {
         (p) =>
           p.ulpin.toUpperCase() === clean ||
           p.id.toUpperCase() === clean ||
+          (p.regNumber && p.regNumber.toUpperCase() === clean) ||
+          (p.regNumber && p.regNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
           (p.fullSurveyNo && p.fullSurveyNo.toUpperCase() === clean) ||
           (p.fullSurveyNo && p.fullSurveyNo.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
           p.surveyNumber.toUpperCase() === clean ||
@@ -65,7 +67,7 @@ export const GISDashboard: React.FC = () => {
     }
   }, [activeParcel]);
 
-  // Search Submit Handler: Deep property fly-to search for ULPIN or Survey Subdivision (e.g. 124/2)
+  // Search Submit Handler: Supports Registration Number, ULPIN or Survey Subdivision
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const query = searchQuery.trim().toUpperCase();
@@ -77,6 +79,8 @@ export const GISDashboard: React.FC = () => {
       (p) =>
         p.ulpin.toUpperCase() === query ||
         p.id.toUpperCase() === query ||
+        (p.regNumber && p.regNumber.toUpperCase() === query) ||
+        (p.regNumber && p.regNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
         (p.fullSurveyNo && p.fullSurveyNo.toUpperCase() === query) ||
         (p.fullSurveyNo && p.fullSurveyNo.toUpperCase().replace(/\s+/g, '') === cleanNoSpace) ||
         p.surveyNumber.toUpperCase() === query ||
@@ -101,7 +105,7 @@ export const GISDashboard: React.FC = () => {
 
   // Reset filters
   const handleResetFilters = () => {
-    setSearchQuery('124/2');
+    setSearchQuery('REG-2024-CBE-12402');
     setSelectedDistrict('Coimbatore');
     setSelectedTaluk('Pollachi');
     setSelectedState('TN (Tamil Nadu)');
@@ -120,17 +124,17 @@ export const GISDashboard: React.FC = () => {
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
             <span>LandSync DPI</span>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-blue-900 font-bold">POLLACHI PROPERTY & HOUSE GIS</span>
+            <span className="text-blue-900 font-bold">LAND PARCEL INTELLIGENCE GIS</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <span>POLLACHI LAND INTELLIGENCE GIS DASHBOARD</span>
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-950 border border-blue-200 flex items-center gap-1">
               <Home className="w-3.5 h-3.5 text-blue-900" />
-              <span>Property & House Scale Active</span>
+              <span>Parcel Intelligence Active</span>
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-4xl">
-            Property-level cadastral GIS intelligence map for Pollachi Taluk. Search individual house plots by ULPIN or Survey Subdivision (124/2, 124/1), fly deeply into property scale, switch to satellite view, and distinguish land boundaries from satellite buildings.
+            Land parcel intelligence interface for Pollachi Taluk. Search by Registration Number (e.g. REG-2024-CBE-12402), ULPIN, or Survey Subdivision to zoom directly to your parcel and run 5 spatial intelligence checks.
           </p>
         </div>
 
@@ -146,12 +150,12 @@ export const GISDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Property Scale Cadastral Hierarchy Banner */}
+      {/* State Adaptor & Registration Number Flow Banner */}
       <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-3.5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm border border-blue-900">
         <div className="flex items-center gap-2.5">
           <Sparkles className="w-4 h-4 text-teal-300 shrink-0" />
           <div>
-            <span className="font-bold text-teal-300">Property Hierarchy:</span> Pollachi &rarr; Mahalingapuram &rarr; Mahalingapuram Main Road &rarr; Survey 124 &rarr; Plot 124/2 (0.12 Acre House Property).
+            <span className="font-bold text-teal-300">State Adaptor Search Flow:</span> Registration Number REG-2024-CBE-12402 &rarr; State Tamil Nilam &rarr; ULPIN TN-CBE-001-124-2 &rarr; Survey 124/2 (0.12 Acre Plot).
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2.5 py-1 rounded-lg shrink-0 font-mono text-slate-200">
@@ -165,12 +169,12 @@ export const GISDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================= LEFT PANEL (3 cols) ================= */}
         <div className="lg:col-span-3 space-y-4">
-          {/* ULPIN & Survey Number Search Form */}
+          {/* Registration Number & ULPIN Search Form */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
                 <Search className="w-4 h-4 text-blue-900" />
-                <span>Search House Plot / ULPIN</span>
+                <span>Search Reg No / ULPIN</span>
               </h3>
               <button
                 onClick={handleResetFilters}
@@ -185,14 +189,14 @@ export const GISDashboard: React.FC = () => {
             <form onSubmit={handleSearch} className="space-y-2">
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Enter ULPIN or Survey Subdivision
+                  Registration #, ULPIN or Survey No
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="e.g. 124/2 or TN-CBE-001-124-2"
+                    placeholder="e.g. REG-2024-CBE-12402 or 124/2"
                     className="w-full pl-3 pr-9 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold text-blue-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white"
                   />
                   <button
@@ -214,7 +218,7 @@ export const GISDashboard: React.FC = () => {
                   onChange={(e) => setSelectedState(e.target.value)}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-900"
                 >
-                  <option value="TN (Tamil Nadu)">TN – Tamil Nilam (Pollachi Property Cadastral Engine)</option>
+                  <option value="TN (Tamil Nadu)">TN – Tamil Nilam (Pollachi Property Engine)</option>
                   <option value="KA (Karnataka)">KA – Bhoomi RTC Engine</option>
                   <option value="MH (Maharashtra)">MH – MahaBhulekh (7/12)</option>
                   <option value="DL (Delhi)">DL – DDA DPI Spatial System</option>
@@ -258,18 +262,18 @@ export const GISDashboard: React.FC = () => {
               </div>
             </form>
 
-            {/* Quick Mahalingapuram House & Plot Selector Buttons */}
+            {/* Quick Registration Number Presets */}
             <div className="pt-2 border-t border-slate-100">
               <div className="text-[10px] font-bold uppercase text-slate-400 mb-1.5 flex items-center justify-between">
-                <span>Mahalingapuram Street Plots</span>
-                <span className="text-[9px] text-teal-700 font-extrabold">Deep Zoom 🏠</span>
+                <span>Registration Presets</span>
+                <span className="text-[9px] text-teal-700 font-extrabold">Zoom to Parcel 🟡</span>
               </div>
               <div className="flex flex-wrap gap-1">
-                {POLLACHI_TALUK_GIS.parcels.slice(0, 8).map((p) => (
+                {POLLACHI_TALUK_GIS.parcels.slice(0, 6).map((p) => (
                   <button
                     key={p.id}
                     onClick={() => {
-                      const displayNo = p.fullSurveyNo || p.surveyNumber;
+                      const displayNo = p.regNumber || p.fullSurveyNo || p.surveyNumber;
                       setSearchQuery(displayNo);
                       setSelectedParcelId(p.ulpin);
                       setSearchParams({ q: p.ulpin });
@@ -280,14 +284,14 @@ export const GISDashboard: React.FC = () => {
                         : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                     }`}
                   >
-                    Plot {p.fullSurveyNo || p.surveyNumber}
+                    {p.regNumber ? p.regNumber.replace('REG-2024-CBE-', 'Reg ') : `Plot ${p.fullSurveyNo}`}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* 9 GIS Layer Control Switch Panel */}
+          {/* 8 Focused GIS Layer Controls */}
           <LayerControls
             layers={activeLayers}
             onToggleLayer={handleToggleLayer}
@@ -315,8 +319,8 @@ export const GISDashboard: React.FC = () => {
           {/* Pollachi Mahalingapuram Property Plot Strip */}
           <div className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm space-y-2">
             <div className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center justify-between">
-              <span>Neighbourhood Property Grid ({POLLACHI_TALUK_GIS.parcels.length} Adjacent Plots)</span>
-              <span className="text-[10px] text-slate-400 font-normal">Click to fly & zoom</span>
+              <span>Land Parcels ({POLLACHI_TALUK_GIS.parcels.length} Properties)</span>
+              <span className="text-[10px] text-slate-400 font-normal">Click to zoom & inspect</span>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
               {POLLACHI_TALUK_GIS.parcels.map((p) => {
@@ -328,7 +332,7 @@ export const GISDashboard: React.FC = () => {
                     key={p.id}
                     onClick={() => {
                       setSelectedParcelId(p.ulpin);
-                      setSearchQuery(p.fullSurveyNo || p.ulpin);
+                      setSearchQuery(p.regNumber || p.fullSurveyNo || p.ulpin);
                       setSearchParams({ q: p.ulpin });
                     }}
                     className={`px-3 py-2 rounded-xl text-left text-xs shrink-0 border transition min-w-[170px] ${
@@ -341,7 +345,7 @@ export const GISDashboard: React.FC = () => {
                   >
                     <div className="flex items-center justify-between gap-1 mb-0.5">
                       <span className={`font-black ${isSelected ? 'text-teal-300' : 'text-blue-950'}`}>
-                        🏠 Survey {p.fullSurveyNo || p.surveyNumber}
+                        🟡 Survey {p.fullSurveyNo || p.surveyNumber}
                       </span>
                       <span
                         className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
@@ -352,7 +356,7 @@ export const GISDashboard: React.FC = () => {
                       </span>
                     </div>
                     <div className={`text-[10px] font-mono truncate ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                      {p.propertyType || 'Residential Plot'} ({p.areaSqFt ? `${p.areaSqFt.toLocaleString()} sq ft` : ''})
+                      {p.regNumber || p.ulpin}
                     </div>
                   </button>
                 );

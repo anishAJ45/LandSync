@@ -4,6 +4,7 @@
 export interface LandParcel {
   id: string;
   ulpin: string;
+  regNumber?: string; // e.g. "REG-2024-CBE-12402"
   surveyNumber: string; // e.g. "124"
   subdivision: string; // e.g. "2"
   fullSurveyNo: string; // e.g. "124/2"
@@ -30,13 +31,13 @@ export interface LandParcel {
   disclaimerNotice?: string;
 }
 
-// 10 Geographically organized property plots & physical building footprints along Mahalingapuram Main Road, Pollachi
-// Main Road Corridor: lat 10.66405 to 10.66425 (completely clear of any polygon)
+// 10 Geographically organized property plots along Mahalingapuram Main Road, Pollachi
 export const POLLACHI_PARCELS: LandParcel[] = [
   // --- NORTH SIDE PROPERTIES (lat 10.66425 to 10.66455) ---
   {
     id: 'P-POL-124-1',
     ulpin: 'TN-CBE-001-124-1',
+    regNumber: 'REG-2024-CBE-12401',
     surveyNumber: '124',
     subdivision: '1',
     fullSurveyNo: '124/1',
@@ -56,7 +57,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Subramaniam Ranganathan',
     marketValue: '₹ 38.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12401',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66425, 77.00700],
       [10.66455, 77.00700],
@@ -82,6 +83,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-124-2',
     ulpin: 'TN-CBE-001-124-2',
+    regNumber: 'REG-2024-CBE-12402',
     surveyNumber: '124',
     subdivision: '2',
     fullSurveyNo: '124/2',
@@ -101,7 +103,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Kavitha Ramachandran',
     marketValue: '₹ 68.50 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12402',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66425, 77.00760],
       [10.66455, 77.00760],
@@ -127,6 +129,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-124-3',
     ulpin: 'TN-CBE-001-124-3',
+    regNumber: 'REG-2024-CBE-12403',
     surveyNumber: '124',
     subdivision: '3',
     fullSurveyNo: '124/3',
@@ -147,7 +150,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     marketValue: '₹ 52.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12403',
     discrepancyNotes: '5.8% survey vector discrepancy vs Patta registry line.',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66425, 77.00820],
       [10.66455, 77.00820],
@@ -173,6 +176,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-124-4',
     ulpin: 'TN-CBE-001-124-4',
+    regNumber: 'REG-2024-CBE-12404',
     surveyNumber: '124',
     subdivision: '4',
     fullSurveyNo: '124/4',
@@ -192,7 +196,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Anand Viswanathan',
     marketValue: '₹ 58.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12404',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66425, 77.00880],
       [10.66455, 77.00880],
@@ -218,6 +222,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-124-5',
     ulpin: 'TN-CBE-001-124-5',
+    regNumber: 'REG-2024-CBE-12405',
     surveyNumber: '124',
     subdivision: '5',
     fullSurveyNo: '124/5',
@@ -237,7 +242,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Pollachi Traders Association',
     marketValue: '₹ 1.15 Cr',
     pattaNumber: 'PATTA-TN-POL-12405',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66425, 77.00940],
       [10.66455, 77.00940],
@@ -265,6 +270,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-125-1',
     ulpin: 'TN-CBE-001-125-1',
+    regNumber: 'REG-2024-CBE-12501',
     surveyNumber: '125',
     subdivision: '1',
     fullSurveyNo: '125/1',
@@ -284,7 +290,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Murugan Thangavel',
     marketValue: '₹ 42.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12501',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66375, 77.00700],
       [10.66405, 77.00700],
@@ -310,6 +316,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-125-2',
     ulpin: 'TN-CBE-001-125-2',
+    regNumber: 'REG-2024-CBE-12502',
     surveyNumber: '125',
     subdivision: '2',
     fullSurveyNo: '125/2',
@@ -329,7 +336,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Deepa Natarajan',
     marketValue: '₹ 62.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12502',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66375, 77.00760],
       [10.66405, 77.00760],
@@ -355,6 +362,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-125-3',
     ulpin: 'TN-CBE-001-125-3',
+    regNumber: 'REG-2024-CBE-12503',
     surveyNumber: '125',
     subdivision: '3',
     fullSurveyNo: '125/3',
@@ -374,7 +382,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Karthik Subramanian',
     marketValue: '₹ 72.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12503',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66375, 77.00820],
       [10.66405, 77.00820],
@@ -400,6 +408,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-125-4',
     ulpin: 'TN-CBE-001-125-4',
+    regNumber: 'REG-2024-CBE-12504',
     surveyNumber: '125',
     subdivision: '4',
     fullSurveyNo: '125/4',
@@ -419,7 +428,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Saravanan Periasamy',
     marketValue: '₹ 45.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12504',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66375, 77.00880],
       [10.66405, 77.00880],
@@ -445,6 +454,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
   {
     id: 'P-POL-126-1',
     ulpin: 'TN-CBE-001-126-1',
+    regNumber: 'REG-2024-CBE-12601',
     surveyNumber: '126',
     subdivision: '1',
     fullSurveyNo: '126/1',
@@ -464,7 +474,7 @@ export const POLLACHI_PARCELS: LandParcel[] = [
     ownerName: 'Revathi Krishnan',
     marketValue: '₹ 56.00 Lakhs',
     pattaNumber: 'PATTA-TN-POL-12601',
-    disclaimerNotice: 'Prototype cadastral/reference parcel data – official land records required for legal boundary verification.',
+    disclaimerNotice: 'Based on available GIS and reference datasets. Official verification may be required.',
     boundaryCoordinates: [
       [10.66375, 77.00940],
       [10.66405, 77.00940],

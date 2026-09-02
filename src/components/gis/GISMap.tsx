@@ -71,34 +71,10 @@ interface MapControllerProps {
   gisData: DistrictGISData;
 }
 
-// MapController component to handle pane setup & fly to property scale
+// MapController component to fly to property scale
 const MapController: React.FC<MapControllerProps> = ({ selectedParcel, gisData }) => {
   const map = useMap();
 
-  // Create custom Z-indexed Leaflet panes safely
-  useEffect(() => {
-    const createCustomPane = (name: string, zIndex: number) => {
-      if (!map.getPane(name)) {
-        try {
-          const pane = map.createPane(name);
-          pane.style.zIndex = zIndex.toString();
-        } catch (e) {
-          // Pane creation fallback
-        }
-      }
-    };
-
-    createCustomPane('agriPane', 410);
-    createCustomPane('envPane', 420);
-    createCustomPane('govtPane', 430);
-    createCustomPane('layoutPane', 440);
-    createCustomPane('waterPane', 450);
-    createCustomPane('roadPane', 460);
-    createCustomPane('parcelPane', 470);
-    createCustomPane('buildingPane', 480);
-  }, [map]);
-
-  // Fly deeply into selected property
   useEffect(() => {
     if (selectedParcel) {
       const coords = selectedParcel.boundaryCoordinates || selectedParcel.coordinates;
@@ -148,6 +124,7 @@ export const GISMap: React.FC<GISMapProps> = ({
         (p) =>
           p.ulpin.toUpperCase() === cleanId ||
           p.id.toUpperCase() === cleanId ||
+          (p.regNumber && p.regNumber.toUpperCase() === cleanId) ||
           (p.fullSurveyNo && p.fullSurveyNo.toUpperCase() === cleanId) ||
           p.surveyNumber.toUpperCase() === cleanId ||
           p.surveyNumber.toUpperCase().replace(/\s+/g, '') === cleanNoSpace
@@ -247,85 +224,62 @@ export const GISMap: React.FC<GISMapProps> = ({
           maxNativeZoom={activeBaseMap.maxNativeZoom}
         />
 
-        {/* Layer 2: Agricultural Zones (North of Road) */}
-        {activeLayers.agriculturalLand &&
-          gisData.agriculturalZones.map((zone) => (
-            <Polygon
-              key={zone.id}
-              positions={zone.coordinates}
-              pathOptions={{
-                color: zone.color,
-                weight: 1.5,
-                fillColor: zone.color,
-                fillOpacity: (zone.fillOpacity || 0.22) * layerOpacity
-              }}
-            >
-              <Tooltip sticky>
-                <div className="font-sans text-xs p-1">
-                  <div className="font-bold text-emerald-900">🌾 {zone.name}</div>
-                  <div className="text-[10px] text-slate-600 font-semibold">{zone.typeLabel}</div>
-                </div>
-              </Tooltip>
-            </Polygon>
-          ))}
-
-        {/* Layer 3: Environmental Protection Zones */}
-        {activeLayers.environmentalZones &&
-          gisData.environmentalZones.map((zone) => (
-            <Polygon
-              key={zone.id}
-              positions={zone.coordinates}
-              pathOptions={{
-                color: zone.color,
-                weight: 1.5,
-                dashArray: '4, 4',
-                fillColor: zone.color,
-                fillOpacity: (zone.fillOpacity || 0.22) * layerOpacity
-              }}
-            >
-              <Tooltip sticky>
-                <div className="font-sans text-xs p-1">
-                  <div className="font-bold text-purple-900">🌿 {zone.name}</div>
-                  <div className="text-[10px] text-slate-600 font-semibold">{zone.typeLabel}</div>
-                </div>
-              </Tooltip>
-            </Polygon>
-          ))}
-
-        {/* Layer 4: Approved Construction / Layout Zones */}
+        {/* Layer 2: Approved Layout / Construction Zone (Transparent Green 🟢 #10b981) */}
         {activeLayers.approvedLayout &&
           gisData.approvedLayoutZones.map((zone) => (
             <Polygon
               key={zone.id}
               positions={zone.coordinates}
               pathOptions={{
-                color: zone.color,
-                weight: 1.5,
-                fillColor: zone.color,
-                fillOpacity: (zone.fillOpacity || 0.22) * layerOpacity
+                color: '#10b981',
+                weight: 2,
+                fillColor: '#10b981',
+                fillOpacity: 0.20 * layerOpacity
               }}
             >
               <Tooltip sticky>
                 <div className="font-sans text-xs p-1">
-                  <div className="font-bold text-cyan-900">🟢 {zone.name}</div>
+                  <div className="font-bold text-emerald-950">🟢 {zone.name}</div>
                   <div className="text-[10px] text-slate-600 font-semibold">{zone.typeLabel}</div>
                 </div>
               </Tooltip>
             </Polygon>
           ))}
 
-        {/* Layer 5: Government / Poramboke Zones */}
+        {/* Layer 3: Agricultural Land (Light Transparent Green 🌾 #84cc16) */}
+        {activeLayers.agriculturalLand &&
+          gisData.agriculturalZones.map((zone) => (
+            <Polygon
+              key={zone.id}
+              positions={zone.coordinates}
+              pathOptions={{
+                color: '#84cc16',
+                weight: 1.5,
+                fillColor: '#84cc16',
+                fillOpacity: 0.18 * layerOpacity
+              }}
+            >
+              <Tooltip sticky>
+                <div className="font-sans text-xs p-1">
+                  <div className="font-bold text-lime-950">🌾 {zone.name}</div>
+                  <div className="text-[10px] text-slate-600 font-semibold">{zone.typeLabel}</div>
+                </div>
+              </Tooltip>
+            </Polygon>
+          ))}
+
+        {/* Layer 4: Government / Poramboke Land (Orange 🏛️ #f97316) */}
         {activeLayers.governmentLand &&
           gisData.governmentZones.map((zone) => (
             <Polygon
               key={zone.id}
               positions={zone.coordinates}
               pathOptions={{
-                color: zone.color,
-                weight: 1.5,
+                color: '#f97316',
+                weight: 2,
                 dashArray: '5, 5',
-                fillColor: zone.color,
-                fillOpacity: (zone.fillOpacity || 0.22) * layerOpacity
+                fillColor: '#f97316',
+                fillOpacity: 0.22 * layerOpacity
               }}
             >
               <Tooltip sticky>
@@ -337,44 +291,30 @@ export const GISMap: React.FC<GISMapProps> = ({
             </Polygon>
           ))}
 
-        {/* Layer 6: Ward & Township Overlays */}
-        {activeLayers.wardBoundaries &&
-          gisData.wards &&
-          gisData.wards.map((ward) => (
+        {/* Layer 5: Prone / Restricted Zones (Red/Purple ⚠️ #ef4444 / #a855f7) */}
+        {activeLayers.environmentalZones &&
+          gisData.environmentalZones.map((zone) => (
             <Polygon
-              key={ward.id}
-              positions={ward.coordinates}
+              key={zone.id}
+              positions={zone.coordinates}
               pathOptions={{
-                color: ward.color || '#6366f1',
-                weight: 1.5,
-                dashArray: '6, 6',
-                fillOpacity: 0
+                color: zone.color || '#a855f7',
+                weight: 2,
+                dashArray: '4, 4',
+                fillColor: zone.color || '#a855f7',
+                fillOpacity: 0.22 * layerOpacity
               }}
             >
               <Tooltip sticky>
                 <div className="font-sans text-xs p-1">
-                  <div className="font-bold text-indigo-900">🏛️ {ward.wardNumber} ({ward.locality})</div>
+                  <div className="font-bold text-purple-950">⚠️ {zone.name}</div>
+                  <div className="text-[10px] text-slate-600 font-semibold">{zone.typeLabel}</div>
                 </div>
               </Tooltip>
             </Polygon>
           ))}
 
-        {activeLayers.townshipAreas &&
-          gisData.township &&
-          gisData.township.map((town) => (
-            <Polygon
-              key={town.id}
-              positions={town.coordinates}
-              pathOptions={{
-                color: town.color || '#f59e0b',
-                weight: 1.5,
-                dashArray: '8, 4',
-                fillOpacity: 0
-              }}
-            />
-          ))}
-
-        {/* Layer 7: Water Bodies (Stream Corridor & Mahalingapuram Pond) */}
+        {/* Layer 6: Water Bodies (Blue 🌊 #0284c7) */}
         {activeLayers.waterBodies &&
           gisData.waterBodies.map((wb) => {
             if (wb.geometryType === 'polyline') {
@@ -383,8 +323,8 @@ export const GISMap: React.FC<GISMapProps> = ({
                   key={wb.id}
                   positions={wb.coordinates as [number, number][]}
                   pathOptions={{
-                    color: wb.color,
-                    weight: 4.5,
+                    color: '#0284c7',
+                    weight: 5,
                     opacity: 0.9 * layerOpacity
                   }}
                 >
@@ -401,9 +341,9 @@ export const GISMap: React.FC<GISMapProps> = ({
                   key={wb.id}
                   positions={wb.coordinates as [number, number][]}
                   pathOptions={{
-                    color: wb.color,
+                    color: '#0284c7',
                     weight: 2,
-                    fillColor: wb.color,
+                    fillColor: '#0284c7',
                     fillOpacity: 0.50 * layerOpacity
                   }}
                 >
@@ -417,14 +357,14 @@ export const GISMap: React.FC<GISMapProps> = ({
             }
           })}
 
-        {/* Layer 8: Roads & Infrastructure (Mahalingapuram Main Road - Zero Polygon Overlap) */}
+        {/* Layer 7: Roads & Infrastructure (Slate Corridor 🛣️) */}
         {activeLayers.roadsInfrastructure &&
           gisData.infrastructure.map((infra) => (
             <Polyline
               key={infra.id}
               positions={infra.coordinates}
               pathOptions={{
-                color: infra.color,
+                color: infra.color || '#334155',
                 weight: 6, // Thick clear road corridor
                 opacity: 0.95 * layerOpacity
               }}
@@ -437,7 +377,7 @@ export const GISMap: React.FC<GISMapProps> = ({
             </Polyline>
           ))}
 
-        {/* Layer 9: Reference Land Parcel Plot Boundaries */}
+        {/* Layer 8: Land Parcel Boundaries & Selected Land Parcel (Yellow 🟡 #eab308) */}
         {activeLayers.landParcels &&
           gisData.parcels.map((parcel) => {
             const isSelected = selectedParcel && parcel.id === selectedParcel.id;
@@ -446,21 +386,21 @@ export const GISMap: React.FC<GISMapProps> = ({
 
             return (
               <React.Fragment key={`parcel-poly-${parcel.id}`}>
-                {/* Parcel Boundary Outer Stroke & Fill */}
+                {/* Reference Survey Parcel Boundary */}
                 <Polygon
                   positions={coords}
                   pathOptions={{
                     color: isSelected
-                      ? '#eab308' // Bright Yellow Stroke for Selected Property Plot
+                      ? '#eab308' // Glowing Yellow Stroke for Selected Land Parcel
                       : isDiscrepancy
-                      ? '#ef4444' // Red warning outline for boundary discrepancy
+                      ? '#ef4444' // Red warning outline for discrepancy
                       : isSatelliteActive
-                      ? '#00f2fe' // Bright Cyan boundary outline over satellite view
-                      : '#0f172a', // Dark crisp boundary outline over street view
+                      ? '#00f2fe' // Cyan outline over satellite view
+                      : '#0f172a', // Dark outline over street map
                     weight: isSelected ? 4.5 : isDiscrepancy ? 2.5 : 2,
                     dashArray: isDiscrepancy && !isSelected ? '4, 4' : undefined,
                     fillColor: isSelected
-                      ? '#fef08a' // Bright Yellow Fill for selected plot
+                      ? '#fef08a' // Yellow fill for selected land
                       : isDiscrepancy
                       ? '#fee2e2'
                       : '#ffffff',
@@ -493,7 +433,7 @@ export const GISMap: React.FC<GISMapProps> = ({
                   </Tooltip>
                 </Polygon>
 
-                {/* Layer 10: Building Footprint Geometry (Physical House Structure Polygon) */}
+                {/* Building Footprint Polygon inside Plot */}
                 {parcel.buildingFootprintCoordinates && (
                   <Polygon
                     positions={parcel.buildingFootprintCoordinates}
@@ -525,11 +465,11 @@ export const GISMap: React.FC<GISMapProps> = ({
                 {/* Selected Property Popup */}
                 {isSelected && (
                   <Popup position={coords[0]}>
-                    <div className="font-sans text-xs p-1 select-none leading-relaxed min-w-[230px]">
+                    <div className="font-sans text-xs p-1 select-none leading-relaxed min-w-[240px]">
                       <div className="font-black text-blue-950 text-xs mb-1 border-b pb-1 flex items-center justify-between">
                         <span className="flex items-center gap-1">
-                          <span>🏠</span>
-                          <span>Selected Property & House</span>
+                          <span>🟡</span>
+                          <span>Selected Land Parcel</span>
                         </span>
                         <span className="text-[10px] text-teal-800 font-bold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
                           {parcel.village}
@@ -537,6 +477,9 @@ export const GISMap: React.FC<GISMapProps> = ({
                       </div>
 
                       <div className="font-bold text-slate-900 mt-1">
+                        Registration #: <span className="text-blue-950 font-black">{parcel.regNumber || 'REG-2024-CBE-12402'}</span>
+                      </div>
+                      <div className="font-bold text-slate-900">
                         Survey Number: <span className="text-blue-950 font-black">{parcel.fullSurveyNo || parcel.surveyNumber}</span>
                       </div>
                       <div className="font-bold text-slate-900">
@@ -549,20 +492,8 @@ export const GISMap: React.FC<GISMapProps> = ({
                         Location: {parcel.streetName}
                       </div>
 
-                      {/* Distinction: Parcel Boundary vs Building Footprint */}
-                      <div className="mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200 space-y-1">
-                        <div className="text-[10px] font-bold text-blue-950 flex items-center gap-1">
-                          <span>📐 PARCEL BOUNDARY:</span>
-                          <span className="font-mono font-normal">Plot Boundary Line</span>
-                        </div>
-                        <div className="text-[10px] font-bold text-blue-900 flex items-center gap-1">
-                          <span>🏠 BUILDING FOOTPRINT:</span>
-                          <span className="font-mono font-normal">{parcel.buildingObservation || 'Physical Building Structure'}</span>
-                        </div>
-                      </div>
-
                       <div className="text-[9px] text-slate-500 italic mt-1.5 border-t pt-1">
-                        Building footprints and satellite observations are visual references. Survey parcel boundaries require authoritative cadastral/FMB data for official legal verification.
+                        Based on available GIS and reference datasets. Official verification may be required.
                       </div>
                     </div>
                   </Popup>
@@ -582,9 +513,9 @@ export const GISMap: React.FC<GISMapProps> = ({
 
       {/* Map Watermark Banner */}
       <div className="absolute bottom-2 left-3 z-[1000] px-3 py-1 bg-white/90 backdrop-blur-xs rounded-lg text-[10px] text-slate-800 font-extrabold border border-slate-200/80 shadow-2xs pointer-events-none flex items-center gap-1.5">
-        <span>Tamil Nilam Geo-Info Style</span>
+        <span>🟡 Land Parcel Intelligence Active</span>
         <span className="text-slate-400">|</span>
-        <span>Property & Building Scale</span>
+        <span>8 Focused GIS Layers</span>
         <span className="text-slate-400">|</span>
         <span>Base: {activeBaseMap.name}</span>
       </div>
