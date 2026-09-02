@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Compass,
@@ -14,8 +14,13 @@ import {
   ShieldCheck,
   FileText,
   MapPin,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from 'lucide-react';
+import { parcelService } from '../../services/parcelService';
+import { MapContainer } from '../../components/gis/MapContainer';
+import { Parcel, GeoJSONFeatureCollection } from '../../types';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 interface JourneyStep {
   id: number;
@@ -35,13 +40,82 @@ export const CitizenGuidedJourney: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
 
+  // GIS Data states
+  const [parcels, setParcels] = useState<Parcel[]>([]);
+  const [geoJsonData, setGeoJsonData] = useState<GeoJSONFeatureCollection | null>(null);
+  const [loadingGIS, setLoadingGIS] = useState(true);
+
   // Form State
-  const [surveyNo, setSurveyNo] = useState('124/1');
+  const [surveyNo, setSurveyNo] = useState('124/2');
   const [district, setDistrict] = useState('Coimbatore');
-  const [village, setVillage] = useState('Kalapatti');
+  const [village, setVillage] = useState('Demo Village');
   const [selectedService, setSelectedService] = useState('MUTATION');
   const [isVerifying, setIsVerifying] = useState(false);
   const [applicationRef, setApplicationRef] = useState<string | null>(null);
+
+  // ULPIN Search state
+  const [ulpinQuery, setUlpinQuery] = useState('ULPIN-TN-00124-02');
+  const [isSearching, setIsSearching] = useState(false);
+  const [landIdentified, setLandIdentified] = useState(false);
+  const [verifyingPipeline, setVerifyingPipeline] = useState(false);
+  const [pipelineStepIndex, setPipelineStepIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchGIS = async () => {
+      try {
+        setLoadingGIS(true);
+        const [allParcels, geojson] = await Promise.all([
+          parcelService.getAllParcels(),
+          parcelService.getGeoJSON()
+        ]);
+        setParcels(allParcels);
+        setGeoJsonData(geojson);
+      } catch (err) {
+        console.error('Error fetching GIS data for Guided Journey:', err);
+      } finally {
+        setLoadingGIS(false);
+      }
+    };
+    fetchGIS();
+  }, []);
+
+  const matchedParcel = useMemo(() => {
+    // Return TN-CBE-001-124-2 as matched parcel for ULPIN-TN-00124-02
+    if (landIdentified && (ulpinQuery.toUpperCase().includes('124-02') || ulpinQuery.toUpperCase().includes('124/2'))) {
+      return parcels.find(p => p.parcel_id === 'TN-CBE-001-124-2');
+    }
+    const query = surveyNo.trim().toLowerCase();
+    return parcels.find(
+      (p) =>
+        p.survey_number.toLowerCase() === query ||
+        p.parcel_id.toLowerCase() === query ||
+        p.survey_number.replace(/\s+/g, '') === query.replace(/\s+/g, '')
+    );
+  }, [surveyNo, parcels, landIdentified, ulpinQuery]);
+
+  const handleFindLand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ulpinQuery.trim()) return;
+    setIsSearching(true);
+    setLandIdentified(false);
+    await new Promise((r) => setTimeout(r, 650));
+    setIsSearching(false);
+    setLandIdentified(true);
+  };
+
+  const handleStartVerification = async () => {
+    setVerifyingPipeline(true);
+    setPipelineStepIndex(0);
+
+    for (let i = 0; i < 8; i++) {
+      setPipelineStepIndex(i);
+      await new Promise((r) => setTimeout(r, 550));
+    }
+
+    setVerifyingPipeline(false);
+    setPipelineStepIndex(null);
+    setCurrentStep(2); // auto-advance to Step 2
+  };
 
   const handleNext = () => {
     if (currentStep < 5) {
@@ -110,101 +184,219 @@ export const CitizenGuidedJourney: React.FC = () => {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
         {/* STEP 1: LOCATE PARCEL */}
         {currentStep === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">Step 1: Locate Your Land Parcel</h2>
-            <p className="text-xs text-slate-600">
-              Provide your revenue survey number, village jurisdiction, or 14-digit Unique Land Parcel Identification Number (ULPIN).
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div>
-                <label className="text-xs font-bold text-slate-700">State & District</label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50"
-                >
-                  <option value="Coimbatore">Tamil Nadu - Coimbatore</option>
-                  <option value="Lucknow">Uttar Pradesh - Lucknow</option>
-                  <option value="Jaipur">Rajasthan - Jaipur</option>
-                  <option value="Pune">Maharashtra - Pune</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Taluk / Village</label>
-                <input
-                  type="text"
-                  value={village}
-                  onChange={(e) => setVillage(e.target.value)}
-                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-200 text-xs font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Survey No. / Subdiv</label>
-                <input
-                  type="text"
-                  value={surveyNo}
-                  onChange={(e) => setSurveyNo(e.target.value)}
-                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold"
-                />
-              </div>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h2 className="text-base font-extrabold text-blue-950">Step 1: ULPIN Land Search & Identification</h2>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/80 animate-pulse">
+                SIH Demonstration Mode
+              </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-blue-900" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">Detected Parcel: TN-CBE-001-124-1</h4>
-                  <span className="text-[11px] text-slate-600">Owner: S. Ramanathan • Area: 42.50 cents</span>
+            {/* ULPIN Input Form */}
+            <form onSubmit={handleFindLand} className="space-y-3">
+              <label className="block text-xs font-bold text-slate-700">Enter ULPIN</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={ulpinQuery}
+                  onChange={(e) => setUlpinQuery(e.target.value)}
+                  placeholder="Example: ULPIN-TN-00124-02"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-950 placeholder:text-slate-400"
+                />
+                <button
+                  type="submit"
+                  disabled={isSearching}
+                  className="px-5 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs disabled:opacity-50 cursor-pointer shrink-0"
+                >
+                  {isSearching ? 'Searching...' : '🔍 Find Land'}
+                </button>
+              </div>
+            </form>
+
+            {/* Simulation Warning Notification Banner */}
+            <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-[11px] text-amber-950 font-semibold italic">
+              📢 Demo / Prototype Data – For SIH Demonstration Only. Please query <strong>ULPIN-TN-00124-02</strong>.
+            </div>
+
+            {/* Identified Land Box */}
+            {landIdentified && (
+              <div className="space-y-5 animate-in fade-in duration-300">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3">
+                  <div className="flex items-center gap-2 font-bold text-emerald-800 text-xs">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" />
+                    <span>Land Identified Successfully</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-[11px] text-slate-700 font-semibold">
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">ULPIN</span>
+                      <strong className="font-mono text-slate-900 block mt-0.5">{ulpinQuery}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">State</span>
+                      <strong className="text-slate-900 block mt-0.5">Tamil Nadu</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">District</span>
+                      <strong className="text-slate-900 block mt-0.5">Coimbatore</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Village</span>
+                      <strong className="text-slate-900 block mt-0.5">Demo Village</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Survey Number</span>
+                      <strong className="text-slate-900 block mt-0.5">124/2</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Patta Number</span>
+                      <strong className="text-slate-900 block mt-0.5">PT-2025-4567</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Land Area</span>
+                      <strong className="text-slate-900 block mt-0.5">2.50 Acres</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Land Type</span>
+                      <strong className="text-slate-900 block mt-0.5">Agricultural</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold block uppercase text-[9px]">Location</span>
+                      <strong className="text-slate-900 block mt-0.5">Coimbatore, Tamil Nadu</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Linked Records Section */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <h3 className="text-xs font-extrabold text-blue-950 uppercase tracking-wider pb-1.5 border-b border-slate-100">
+                    🔗 Linked Department Records
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-slate-700">
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
+                      <div className="font-bold text-slate-900 text-xs">Registration Records</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Document Number: DOC-2025-12345</div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block mt-1">
+                        Status: Available
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
+                      <div className="font-bold text-slate-900 text-xs">Revenue / Patta Records</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Patta Number: PT-2025-4567</div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block mt-1">
+                        Status: Available
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
+                      <div className="font-bold text-slate-900 text-xs">Survey & GIS Records</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Survey Number: 124/2</div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block mt-1">
+                        Boundary Data: Available
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
+                      <div className="font-bold text-slate-900 text-xs">Encumbrance Records</div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block mt-1">
+                        Status: No active encumbrance found in demo data
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Map Preview */}
+                {matchedParcel && geoJsonData && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Map Boundary Preview</span>
+                    <div className="h-60 rounded-xl overflow-hidden border border-slate-200 relative bg-slate-100 shadow-2xs">
+                      <MapContainer
+                        geoJsonData={geoJsonData}
+                        selectedParcelId={matchedParcel.parcel_id}
+                        hoveredParcelId={null}
+                        onSelectParcel={() => {}}
+                        onHoverParcel={() => {}}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Start Verification Action */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleStartVerification}
+                    className="w-full py-3 rounded-xl bg-blue-950 hover:bg-blue-900 text-teal-300 font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer hover:-translate-y-0.5"
+                  >
+                    🚀 Start LandSync Verification
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => navigate('/parcel/TN-CBE-001-124-1')}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-blue-950 border border-slate-200 shadow-2xs hover:bg-slate-50"
-              >
-                Inspect Cadastral 360°
-              </button>
-            </div>
+            )}
           </div>
         )}
 
         {/* STEP 2: VERIFY OWNERSHIP */}
         {currentStep === 2 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">Step 2: Cross-Registry Verification</h2>
-            <p className="text-xs text-slate-600">
-              LandSync automatically cross-verifies revenue records with the Sub-Registrar Office (SRO) and Encumbrance records.
-            </p>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h2 className="text-base font-extrabold text-blue-950">Step 2: Cross-Registry Verification Report</h2>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                🟢 Verified Record
+              </span>
+            </div>
+
+            {/* Verification Stats Summary */}
+            <div className="p-4 bg-emerald-50/75 border border-emerald-200 rounded-2xl space-y-2">
+              <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Verification Result</div>
+              <div className="flex justify-between items-center text-xs font-bold text-slate-800">
+                <span>Overall Record Status:</span>
+                <span className="text-emerald-700">✓ Fully Reconciled & Consistent</span>
+              </div>
+              <p className="text-[11px] text-slate-600 font-semibold leading-relaxed">
+                All linked records in Tamil Nilam (Revenue), SRO Gandhipuram (Registration), and Cadastral GIS database match within zero tolerance boundaries.
+              </p>
+              <div className="text-[10px] text-slate-400 font-semibold italic mt-1 text-center">
+                “Demo / Prototype Data – For SIH Demonstration Only”
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-1">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Revenue Patta</span>
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1 text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Revenue Patta Records</span>
                 </div>
-                <p className="text-xs font-mono text-slate-900">Patta No: 2841</p>
+                <p className="text-[11px] font-mono text-slate-900 font-semibold mt-1">Patta No: PT-2025-4567</p>
                 <p className="text-[11px] text-slate-600">Verified against Tamil Nilam API</p>
               </div>
 
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-1">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1 text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Registration (SRO)</span>
                 </div>
-                <p className="text-xs font-mono text-slate-900">Deed: 1420/2019</p>
-                <p className="text-[11px] text-slate-600">SRO Gandhipuram (Clear Title)</p>
+                <p className="text-[11px] font-mono text-slate-900 font-semibold mt-1">Deed: DOC-2025-12345</p>
+                <p className="text-[11px] text-slate-600">SRO Sulur Registry (Clear Title)</p>
               </div>
 
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-1">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Encumbrance Status</span>
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1 text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Encumbrance & Liens</span>
                 </div>
-                <p className="text-xs font-bold text-slate-900">Nil Encumbrance</p>
-                <p className="text-[11px] text-slate-600">No active mortgage / court stay</p>
+                <p className="text-[11px] font-bold text-slate-900 mt-1">Nil Encumbrance</p>
+                <p className="text-[11px] text-slate-600">No active bank mortgages found</p>
               </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs text-slate-600 font-semibold">
+              <span className="font-bold text-slate-800">💡 Next Step Checklist</span>
+              <p>Your registry validation checks are complete. Proceed to Step 3 to upload sale deeds or tax receipts for AI OCR validation before finalizing the mutation application.</p>
             </div>
           </div>
         )}
@@ -330,11 +522,65 @@ export const CitizenGuidedJourney: React.FC = () => {
 
             <button
               onClick={handleNext}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-950 text-white hover:bg-blue-900 flex items-center gap-1.5 shadow-xs"
+              disabled={currentStep === 1 && !landIdentified}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-950 text-white hover:bg-blue-900 flex items-center gap-1.5 shadow-xs disabled:opacity-40"
             >
               <span>{currentStep === 5 ? 'Confirm & Submit Application' : 'Next Step'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
+          </div>
+        )}
+
+        {/* Verification Pipeline Simulation Modal Overlay */}
+        {verifyingPipeline && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-6 animate-in fade-in duration-200">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-900 animate-pulse">
+                  <Sparkles className="w-5 h-5 text-teal-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-blue-950">Executing LandSync State Router...</h3>
+                  <p className="text-xs text-slate-500 font-semibold">Demo / Prototype Data – For SIH Demonstration Only</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 py-2">
+                {[
+                  'ULPIN Identified',
+                  'Identify State: TN (Tamil Nadu)',
+                  'Routing request to State Router...',
+                  'Active Tamil Nadu State Adapter selected',
+                  'Fetching dummy Revenue, SRO & GIS department records...',
+                  'Normalizing to LandSync Common Data Model Template...',
+                  'AI-Assisted Cross-Department comparison analysis running...',
+                  'Reconciling final verification results...'
+                ].map((stepText, idx) => {
+                  const isCompleted = idx < (pipelineStepIndex ?? 0);
+                  const isActive = idx === pipelineStepIndex;
+                  
+                  return (
+                    <div key={idx} className="flex items-center gap-3 text-xs font-bold transition duration-300">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                        isCompleted ? 'bg-emerald-100 text-emerald-800' : isActive ? 'bg-blue-950 text-teal-300 ring-2 ring-blue-300 animate-bounce' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {isCompleted ? '✓' : idx + 1}
+                      </div>
+                      <span className={isCompleted ? 'text-slate-500 line-through' : isActive ? 'text-blue-950 font-black' : 'text-slate-400 font-semibold'}>
+                        {stepText}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-950 h-full transition-all duration-300 ease-out"
+                  style={{ width: `${(((pipelineStepIndex ?? 0) + 1) / 8) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -163,6 +163,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
 
   // Filter items based on activeFilter or user role
   const getFilteredGroups = () => {
+    if (currentRole === 'citizen') {
+      return [
+        {
+          id: 'citizen',
+          title: 'Citizen Portal',
+          items: [
+            { name: 'Dashboard', path: '/citizen/dashboard', icon: LayoutDashboard },
+            { name: 'My Land', path: '/citizen/records', icon: FolderOpen },
+            { name: 'GIS Map', path: '/gis', icon: MapPin },
+            { name: 'Verify Document', path: '/citizen/documents', icon: FileCheck2 },
+            { name: 'Submit Request', path: '/citizen/create-request', icon: FileText },
+            { name: 'Track Requests', path: '/citizen/applications', icon: Send },
+            { name: 'Notifications', path: '/citizen/notifications', icon: Bell },
+            { name: 'AI Assistant', path: '/assistant', icon: Sparkles }
+          ]
+        }
+      ];
+    }
     return navGroups
       .map((group) => {
         const filteredItems = group.items.filter((item) => {
@@ -250,50 +268,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
         </div>
 
         {/* Portal Filter Pills */}
-        <div className="px-3 py-2 border-b border-slate-100">
-          <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl text-[10px] font-bold text-center">
-            <button
-              onClick={() => setActiveFilter('all')}
-              className={`py-1 rounded-lg transition ${
-                activeFilter === 'all'
-                  ? 'bg-white text-blue-950 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setActiveFilter('citizen')}
-              className={`py-1 rounded-lg transition ${
-                activeFilter === 'citizen'
-                  ? 'bg-teal-600 text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Citizen
-            </button>
-            <button
-              onClick={() => setActiveFilter('officer')}
-              className={`py-1 rounded-lg transition ${
-                activeFilter === 'officer'
-                  ? 'bg-blue-900 text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Officer
-            </button>
-            <button
-              onClick={() => setActiveFilter('admin')}
-              className={`py-1 rounded-lg transition ${
-                activeFilter === 'admin'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Admin
-            </button>
+        {currentRole !== 'citizen' && (
+          <div className="px-3 py-2 border-b border-slate-100">
+            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl text-[10px] font-bold text-center">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`py-1 rounded-lg transition ${
+                  activeFilter === 'all'
+                    ? 'bg-white text-blue-950 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setActiveFilter('citizen')}
+                className={`py-1 rounded-lg transition ${
+                  activeFilter === 'citizen'
+                    ? 'bg-teal-600 text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Citizen
+              </button>
+              <button
+                onClick={() => setActiveFilter('officer')}
+                className={`py-1 rounded-lg transition ${
+                  activeFilter === 'officer'
+                    ? 'bg-blue-900 text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Officer
+              </button>
+              <button
+                onClick={() => setActiveFilter('admin')}
+                className={`py-1 rounded-lg transition ${
+                  activeFilter === 'admin'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Admin
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation list with properly ordered collapsible groups */}
         <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto">
